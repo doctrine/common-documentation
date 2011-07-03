@@ -80,6 +80,8 @@ abbr,acronym { border:0; }
 
 div.document {
     margin-right: 30px;
+    font-size: 12pt;
+    text-align: left !important;
 }
 
 div.documentwrapper {
@@ -319,7 +321,8 @@ pre {
 tt {
     background-color: #ecf0f3;
     padding: 0 1px 0 1px;
-    font-size: 1.4em;
+    /*font-size: 1.4em;*/
+    font-weight: bold;
 }
 
 th {
