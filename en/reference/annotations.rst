@@ -68,6 +68,8 @@ autoloading then you recognize it is a global as well.
 
 To anticipate the configuration section, making the above PHP class work with Doctrine Annotations requires this setup:
 
+.. code-block :: php
+
     <?php
     use Doctrine\Common\Annotations\AnnotationReader;
     use Doctrine\Common\Annotations\AnnotationRegistry;
@@ -125,7 +127,7 @@ during development.
 
 You can also use one of the ``Doctrine\Common\Cache\Cache`` cache implementations to cache the annotations:
 
-<?php
+.. code-block :: php
 
     <?php
     use Doctrine\Common\Annotations\AnnotationReader;
@@ -153,6 +155,8 @@ and should be used during development.
 
 By default the annotation reader returns a list of annotations with numeric indexes. If you want your annotations
 to be indexed by their class name you can wrap the reader in an IndexedReader:
+
+.. code-block :: php
 
     <?php
     use Doctrine\Common\Annotations\AnnotationReader;
