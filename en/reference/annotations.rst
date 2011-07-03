@@ -141,17 +141,78 @@ You can also use one of the ``Doctrine\Common\Cache\Cache`` cache implementation
 The debug flag is used here as well to invalidate the cache files when the PHP class with annotations changed
 and should be used during development.
 
+.. warning ::
+
+    The AnnotationReader works and caches under the
+    assumption that all annotations of a doc-block are processed at
+    once. That means that annotation classes that do not exist and
+    aren't loaded and cannot be autoloaded (using the AnnotationRegistry) would never be visible and not
+    accessible if a cache is used unless the cache is cleared and the
+    annotations requested again, this time with all annotations
+    defined.
+
+By default the annotation reader returns a list of annotations with numeric indexes. If you want your annotations
+to be indexed by their class name you can wrap the reader in an IndexedReader:
+
+    <?php
+    use Doctrine\Common\Annotations\AnnotationReader;
+    use Doctrine\Common\Annotations\IndexedReader;
+
+    $reader = new IndexedReader(new AnnotationReader());
+
+.. warning::
+
+    You should never wrap the indexed reader inside a cached reader only the other way around. This way you can re-use
+    the cache with indexed or numeric keys, otherwise your code may experience failures due to caching in an numerical
+    or indexed format.
+
 Registering Annotations
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 As explained in the Introduction Doctrine Annotations uses its own autoloading mechanism to determine if a
-given annotation has a corresponding PHP class that can be autoloaded.
+given annotation has a corresponding PHP class that can be autoloaded. For Annotation Autoloading you have
+to configure the ``Doctrine\Common\Annotations\AnnotationRegistry``. There are three different mechanisms
+to configure annotation autoloading:
+
+-   Calling ``AnnotationRegistry#registerFile($file)`` to register a file that contains one or more Annotation classes.
+-   Calling ``AnnotationRegistry#registerNamespace($namespace, $dirs = null)`` to register that the given namespace
+    contains annotations and that their base directory is located at the given $dirs or in the include path if NULL is passed.
+    The given directories should *NOT* be the directory where classes of the namespace are in, but the base directory
+    of the root namespace. The AnnotationRegistry uses a namespace to directory seperator approach to resolve the correct path.
+-   Calling ``AnnotationRegistry#registerLoader($callabale)`` to register an autoloader callback. The callback accepts the
+    class as first and only parameter and has to return true if the corresponding file was found and included.
+
+.. note:: 
+
+    Loaders have to fail silently, if a class is not found even if it matches for example the namespace prefix of that loader.
+    Never is a loader to throw a warning or exception if the loading failed otherwise parsing doc block annotations will become
+    a huge pain.
+
+A sample loader callback could look like:
+
+.. code-block:: php
+
+    <?php
+    use Doctrine\Common\Annotations\AnnotationRegistry;
+    use Symfony\Component\ClassLoader\UniversalClassLoader;
+
+    AnnotationRegistry::registerLoader(function($class) {
+        $file = str_replace("\\", DIRECTORY_SEPARATOR, $class) . ".php";
+
+        if (file_exists("/my/base/path/" . $file)) {
+            // file exists makes sure that the loader fails silently
+            require "/my/base/path/" . $file;
+        }
+    });
+
+    $loader = new UniversalClassLoader();
+    AnnotationRegistry::registerLoader(array($loader, "loadClass"));
 
 Default Namespace
 ~~~~~~~~~~~~~~~~~
 
-If you don't want to specify the fully qualified class name you can
-set the default annotation namespace using the
+If you don't want to specify the fully qualified class name or import 
+classes with the use statement you can set the default annotation namespace using the
 ``setDefaultAnnotationNamespace()`` method. The following is an
 example where we specify the fully qualified class name for the
 annotation:
@@ -207,40 +268,47 @@ So now you could do something like this:
 
 Again, a bit nicer looking than the fully qualified class name!
 
-Annotation Creation
-~~~~~~~~~~~~~~~~~~~
+Ignoring missing exceptions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you want to customize the creation process of the annotation
-class instances then you have two options, you can sub-class the
-``Doctrine\Common\Annotations\Parser`` class and override the
-``newAnnotation()`` method:
+By default an exception is thrown from the AnnotationReader if an annotation was found that:
 
-.. code-block :: php
+- Is not part of the blacklist of ignored "documentation annotations".
+- Was not imported through a use statement
+- Is not a fully qualified class that exists
 
-    <?php
-    class MyParser extends Parser
-    {
-        protected function newAnnotation($name, array $values)
-        {
-            return new $name($values);
-        }
-    }
+You can disable this behavior if your docblocks don't follow this strict requirements:
 
-The other option is to use the ``setAnnotationCreationFunction()``
-method to specify a closure to execute:
-
-.. code-block :: php
+.. code-block:: php
 
     <?php
-    $reader->setAnnotationCreationFunction(function($name, array $values) {
-        return new $name($values);
-    });
+    $reader = new \Doctrine\Common\Annotations\AnnotationReader();
+    $reader->setIgnoreNotImportedAnnotations(true);
 
-Usage
------
+PHP Imports
+~~~~~~~~~~~
 
-Using the library API is simple. First lets define some annotation
-classes:
+By default the annotation reader parses the use-statement of a php file to gain access to the import rules
+and register them for the annotation processing. Only if you are using PHP Imports you can validate the correct
+usage of annotations and throw exceptions if you misspelled an annotation. This mechanism is enabled by default. 
+
+If you want to disable the PHP Import parsing you can do so:
+
+.. code-block:: php
+
+    <?php
+    $reader = new \Doctrine\Common\Annotations\AnnotationReader();
+    $reader->setEnabledPHPImports(false);
+
+This gains you some performance in the parsing process but requires to call ``$reader->setIgnoreNotImportedAnnotations(true)``
+aswell to avoid exceptions.
+
+Annotation Classes
+------------------
+
+If you want to define your own annotations you just have to group them in a namespace and register this namespace
+in the AnnotationRegistry. Additionally annotation classes have to extend ``Doctrine\Common\Annotations\Annotation``
+or contain a class-level docblock with the text @Annotation:
 
 .. code-block :: php
 
@@ -252,17 +320,26 @@ classes:
         public $bar;
     }
     
+    /** @Annotation */
     class Bar
     {
         public $foo;
     }
 
-Now to use the annotations you would just need to do the
-following:
+Usage
+-----
+
+Using the library API is simple. Using the annotations described in the previous section
+you can now annotate other classes with your annotations:
 
 .. code-block :: php
 
     <?php
+    namespace MyCompany\Entity;
+
+    use MyCompany\Annotations\Foo;
+    use MyCompany\Annotations\Bar;
+
     /**
      * @Foo(bar="foo")
      * @Bar(foo="bar")
@@ -276,32 +353,29 @@ Now we can write a script to get the annotations above:
 .. code-block :: php
 
     <?php
-    $reflClass = new ReflectionClass('User');
+    $reflClass = new ReflectionClass('MyCompany\Entity\User');
     $classAnnotations = $reader->getClassAnnotations($reflClass);
-    echo $classAnnotations['MyCompany\Annotations\Foo']->bar; // prints foo
-    echo $classAnnotations['MyCompany\Annotations\Foo']->foo; // prints bar
+
+    foreach ($classAnnotations AS $annot) {
+        if ($annot instanceof \MyCompany\Annotations\Foo) {
+            echo $annot->bar; // prints "foo";
+        } else if ($annot instanceof \MyCompany\Annotations\Bar) {
+            echo $annot->foo; // prints "bar";
+        }
+    }
 
 You have a complete API for retrieving annotation class instances
 from a class, property or method docblock:
 
 
--  getClassAnnotations(ReflectionClass $class)
--  getClassAnnotation(ReflectionClass $class, $annotation)
--  getPropertyAnnotations(ReflectionProperty $property)
--  getPropertyAnnotation(ReflectionProperty $property, $annotation)
--  getMethodAnnotations(ReflectionMethod $method)
--  getMethodAnnotation(ReflectionMethod $method, $annotation)
+-  ``AnnotationReader#getClassAnnotations(ReflectionClass $class)``
+-  ``AnnotationReader#getClassAnnotation(ReflectionClass $class, $annotation)``
+-  ``AnnotationReader#getPropertyAnnotations(ReflectionProperty $property)``
+-  ``AnnotationReader#getPropertyAnnotation(ReflectionProperty $property, $annotation)``
+-  ``AnnotationReader#getMethodAnnotations(ReflectionMethod $method)``
+-  ``AnnotationReader#getMethodAnnotation(ReflectionMethod $method, $annotation)``
 
-.. warning ::
 
-    The AnnotationReader works and caches under the
-    assumption that all annotations of a doc-block are processed at
-    once. That means that annotation classes that do not exist and
-    aren't loaded and cannot be autoloaded (using
-    setAutoloadAnnotationClasses()) would never be visible and not
-    accessible if a cache is used unless the cache is cleared and the
-    annotations requested again, this time with all annotations
-    defined.
 
 
 
