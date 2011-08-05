@@ -210,9 +210,6 @@ A sample loader callback could look like:
 Default Namespace
 ~~~~~~~~~~~~~~~~~
 
-Disclaimer: You should only use this feature if you work in an isolated context
-            where you have control over all available annotations.
-
 If you don't want to specify the fully qualified class name or import 
 classes with the use statement you can set the default annotation namespace using the
 ``setDefaultAnnotationNamespace()`` method. The following is an example where we 
@@ -245,6 +242,12 @@ Now it can look something like:
     }
 
 A little nicer looking!
+
+.. note: 
+
+    You should only use this feature if you work in an isolated context
+    where you have full control over all available annotations.
+    
 
 Ignoring missing exceptions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
