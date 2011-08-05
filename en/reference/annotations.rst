@@ -243,7 +243,7 @@ Now it can look something like:
 
 A little nicer looking!
 
-.. note: 
+.. note::
 
     You should only use this feature if you work in an isolated context
     where you have full control over all available annotations.
