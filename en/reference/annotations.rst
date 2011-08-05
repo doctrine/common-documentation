@@ -29,7 +29,6 @@ Take a look at the following code snippet:
      * @author Benjamin Eberlei
      * @ORM\Entity
      * @MyProject\Annotations\Foobarable
-     * @Gedmo:Timestampable
      */
     class User
     {
@@ -55,7 +54,6 @@ In this snippet you can see a variety of different docblock annotations:
 - Annotations imported through use statements. The statement "use Doctrine\ORM\Mapping AS ORM" makes all classes under that namespace available as @ORM\ClassName. Same goes for the import of "Assert".
 - The @dummy annotation. It is not a documentation annotation and not blacklisted. For Doctrine Annotations it is not entirely clear how to handle this annotation. Depending on the configuration an exception (unknown annotation) will be thrown when parsing this annotation.
 - The fully qualified annotation @MyProject\Annotations\Foobarable. This is transformed directly into the given class name.
-- The aliased Annotation @Gedmo:Timestampable. An alias resolves to a namespace. 
 
 How are these annotations loaded? From looking at the code you could guess that the ORM Mapping, Assert Validation and the fully qualified annotation can just be loaded using
 the defined PHP autoloaders. This is not the case however: For error handling reasons every check for class existance inside the AnnotationReader sets the second parameter $autoload
@@ -79,18 +77,15 @@ To anticipate the configuration section, making the above PHP class work with Do
     AnnotationRegistry::registerAnnotationNamespace("MyProject\Annotations", "/path/to/myproject/src");
 
     $reader = new AnnotationReader();
-    $reader->setIgnoreNotImportedAnnotations( true );
+    AnnotationReader::addGlobalIgnoredName('dummy');
 
 The second block with the annotation registry calls registers all the three different annotation namespaces that are used.
 Doctrine saves all its annotations in a single file, that is why ``AnnotationRegistry#registerFile`` is used in contrast to
 ``AnnotationRegistry#registerAnnotationNamespace`` which creates a PSR-0 compatible loading mechanism for class to file names.
 
-In the third block creates the AnnotationReader instance and sets the error reporting to ignore not imported exceptions.
-This prevents you from finding typos in annotations, however it also allows you to use arbitrary annotations without failure.
-Enabling or disabling this variable is a double-edged sword. Ignoring not imported annotations prevents validation of annotations,
-however it also liberate you from the strict requirements on your docblocks, mainly that unknown annotations will make your code fail.
-Setting this variable is necessary in our example case, otherwise @dummy would throw an exception while parsing the docblock
-of ``MyProject\Entities\User#id``.
+In the third block, we create the actual AnnotationReader instance. Note that we also add "dummy" to the global list of annotations
+for which we do not throw exceptions. Setting this is necessary in our example case, otherwise @dummy would trigger an exception to
+be thrown during the parsing of the docblock of ``MyProject\Entities\User#id``.
 
 Setup and Configuration
 -----------------------
@@ -102,7 +97,7 @@ To use the annotations library is simple, you just need to create a new ``Annota
     <?php
     $reader = new \Doctrine\Common\Annotations\AnnotationReader();
 
-This creates a simple  annotation reader with no caching other than in memory (in php arrays).
+This creates a simple annotation reader with no caching other than in memory (in php arrays).
 Since parsing docblocks can be expensive you should cache this process by using
 a caching reader.
 
@@ -215,11 +210,13 @@ A sample loader callback could look like:
 Default Namespace
 ~~~~~~~~~~~~~~~~~
 
+Disclaimer: You should only use this feature if you work in an isolated context
+            where you have control over all available annotations.
+
 If you don't want to specify the fully qualified class name or import 
 classes with the use statement you can set the default annotation namespace using the
-``setDefaultAnnotationNamespace()`` method. The following is an
-example where we specify the fully qualified class name for the
-annotation:
+``setDefaultAnnotationNamespace()`` method. The following is an example where we 
+specify the fully qualified class name for the annotation:
 
 .. code-block :: php
 
@@ -249,29 +246,6 @@ Now it can look something like:
 
 A little nicer looking!
 
-Namespace Aliases
-~~~~~~~~~~~~~~~~~
-
-Again to save you from having to specify the fully qualified class
-name you can set an alias for a namespace of annotation classes:
-
-.. code-block :: php
-
-    <?php
-    $reader->setAnnotationNamespaceAlias('MyCompany\Annotations\\', 'my');
-
-So now you could do something like this:
-
-.. code-block :: php
-
-    <?php
-    /** @my:Foo */
-    class Test
-    {
-    }
-
-Again, a bit nicer looking than the fully qualified class name!
-
 Ignoring missing exceptions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -281,13 +255,13 @@ By default an exception is thrown from the AnnotationReader if an annotation was
 - Was not imported through a use statement
 - Is not a fully qualified class that exists
 
-You can disable this behavior if your docblocks don't follow this strict requirements:
+You can disable this behavior for specific names if your docblocks do not follow strict requirements:
 
 .. code-block:: php
 
     <?php
     $reader = new \Doctrine\Common\Annotations\AnnotationReader();
-    $reader->setIgnoreNotImportedAnnotations(true);
+    AnnotationReader::addGlobalIgnoredName('foo');
 
 PHP Imports
 ~~~~~~~~~~~
@@ -296,33 +270,26 @@ By default the annotation reader parses the use-statement of a php file to gain 
 and register them for the annotation processing. Only if you are using PHP Imports you can validate the correct
 usage of annotations and throw exceptions if you misspelled an annotation. This mechanism is enabled by default. 
 
-If you want to disable the PHP Import parsing you can do so:
+To ease the upgrade path, we still allow you to disable this mechanism. Note however that we will remove this
+in future versions:
 
 .. code-block:: php
 
     <?php
     $reader = new \Doctrine\Common\Annotations\AnnotationReader();
-    $reader->setEnabledPHPImports(false);
+    $reader->setEnabledPhpImports(false);
 
-This gains you some performance in the parsing process but requires to call ``$reader->setIgnoreNotImportedAnnotations(true)``
-aswell to avoid exceptions.
 
 Annotation Classes
 ------------------
 
 If you want to define your own annotations you just have to group them in a namespace and register this namespace
-in the AnnotationRegistry. Additionally annotation classes have to extend ``Doctrine\Common\Annotations\Annotation``
-or contain a class-level docblock with the text @Annotation:
+in the AnnotationRegistry. Annotation classes have to contain a class-level docblock with the text @Annotation:
 
 .. code-block :: php
 
     <?php
     namespace MyCompany\Annotations;
-    
-    class Foo extends \Doctrine\Common\Annotations\Annotation
-    {
-        public $bar;
-    }
     
     /** @Annotation */
     class Bar
