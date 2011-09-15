@@ -350,6 +350,11 @@ from a class, property or method docblock:
 -  ``AnnotationReader#getMethodAnnotation(ReflectionMethod $method, $annotation)``
 
 
+IDE Support
+-----------
 
+Some IDEs already provide support for annotations:
+
+- Eclipse via the `Symfony2 Plugin <http://pulse00.github.com/Symfony-2-Eclipse-Plugin/>`_
 
 
