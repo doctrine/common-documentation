@@ -303,8 +303,8 @@ in the AnnotationRegistry. Annotation classes have to contain a class-level docb
 Inject annotation values
 ------------------------
 
-The annotation parser check if we the annotation constructor has arguments,
-if so then we will pass the value array,  otherwise will try to inject values into public properties directly:
+The annotation parser check if the annotation constructor has arguments,
+if so then we will pass the value array, otherwise will try to inject values into public properties directly:
 
 
 .. code-block :: php
