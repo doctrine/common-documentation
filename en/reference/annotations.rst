@@ -355,6 +355,6 @@ IDE Support
 
 Some IDEs already provide support for annotations:
 
-- Eclipse via the `Symfony2 Plugin <http://pulse00.github.com/Symfony-2-Eclipse-Plugin/>`_
+- Eclipse via the `Symfony2 Plugin <http://symfony.dubture.com/>`_
 
 
