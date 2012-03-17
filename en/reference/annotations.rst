@@ -432,6 +432,42 @@ If the data type not match you got an ``AnnotationException``
        // some code
     }
 
+
+Constants
+-----------
+
+The use of constants and class constants are available on the annotations parser.
+
+The following usage are allowed :
+
+.. code-block :: php
+
+    <?php
+    namespace MyCompany\Entity;
+
+    use MyCompany\Annotations\Foo;
+    use MyCompany\Annotations\Bar;
+    use MyCompany\Entity\SomeClass;
+
+    /**
+    * @Foo(PHP_EOL)
+    * @Bar(Bar::FOO)
+    * @Foo({SomeClass::FOO, SomeClass::BAR})
+    * @Bar({SomeClass::FOO_KEY = SomeClass::BAR_VALUE})
+    */
+    class User
+    {
+    }
+
+
+Be careful with constants and the cache !
+
+.. note::
+
+    The cached reader will not re-evaluate each time an annotation is loaded from cache.
+    When a constant is changed the cache must be cleaned.
+
+
 Usage
 -----
 
@@ -488,5 +524,3 @@ IDE Support
 Some IDEs already provide support for annotations:
 
 - Eclipse via the `Symfony2 Plugin <http://symfony.dubture.com/>`_
-
-
