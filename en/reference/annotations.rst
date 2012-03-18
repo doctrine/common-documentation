@@ -297,8 +297,176 @@ in the AnnotationRegistry. Annotation classes have to contain a class-level docb
     /** @Annotation */
     class Bar
     {
-        public $foo;
+        //some code
     }
+
+Inject annotation values
+------------------------
+
+The annotation parser check if the annotation constructor has arguments,
+if so then we will pass the value array, otherwise will try to inject values into public properties directly:
+
+
+.. code-block :: php
+
+    <?php
+    namespace MyCompany\Annotations;
+
+    /**
+    * @Annotation
+    *
+    * Some Annotation using a constructor
+    */
+    class Bar
+    {
+        private $foo;
+        public function __construct(array $values)
+        {
+            $this->foo = $values['foo'];
+        }
+    }
+
+    /** 
+    * @Annotation
+    *
+    * Some Annotation without a constructor
+    */
+    class Foo
+    {
+        public $bar;
+    }
+
+Annotation Target
+-----------------
+
+``@Target`` indicates the kinds of class element to which an annotation type is applicable.
+Then you could define one or more targets :
+
+-  ``CLASS`` Allowed in the class docblock
+-  ``PROPERTY`` Allowed in the property docblock
+-  ``METHOD`` Allowed in the method docblock
+-  ``ALL`` Allowed in the class, property and method docblock
+
+If the annotations is not allowed in the current context you got an ``AnnotationException``
+
+.. code-block :: php
+
+    <?php
+    namespace MyCompany\Annotations;
+
+    /**
+    * @Annotation
+    * @Target({"METHOD","PROPERTY"})
+    */
+    class Bar
+    {
+        //some code
+    }
+
+    /**
+    * @Annotation
+    * @Target("CLASS")
+    */
+    class Foo
+    {
+        //some code
+    }
+
+Attribute types
+---------------
+
+Annotation parser check the given parameters using the phpdoc annotation ``@var``,
+The data type could be validated using the ``@var`` annotation on the annotation properties
+or using the annotations ``@Attributes`` and ``@Attribute``.
+
+If the data type not match you got an ``AnnotationException``
+
+.. code-block :: php
+
+    <?php
+    namespace MyCompany\Annotations;
+
+    /**
+    * @Annotation
+    * @Target({"METHOD","PROPERTY"})
+    */
+    class Bar
+    {
+        /** @var mixed */
+        public $mixed;
+        /** @var boolean */
+        public $boolean;
+        /** @var bool */
+        public $bool;
+        /** @var float */
+        public $float;
+        /** @var string */
+        public $string;
+        /** @var integer */
+        public $integer;
+        /** @var array */
+        public $array;
+        /** @var SomeAnnotationClass */
+        public $annotation;
+        /** @var array<integer> */
+        public $arrayOfIntegers;
+        /** @var array<SomeAnnotationClass> */
+        public $arrayOfAnnotations;
+    }
+
+    /**
+    * @Annotation
+    * @Target({"METHOD","PROPERTY"})
+    * @Attributes({
+    *   @Attribute("stringProperty", type = "string"),
+    *   @Attribute("annotProperty",  type = "SomeAnnotationClass"),
+    * })
+    */
+    class Foo
+    {
+        public function __construct(array $values)
+        {
+            $this->stringProperty = $values['stringProperty'];
+            $this->annotProperty = $values['annotProperty'];
+        }
+       // some code
+    }
+
+
+Constants
+-----------
+
+The use of constants and class constants are available on the annotations parser.
+
+The following usage are allowed :
+
+.. code-block :: php
+
+    <?php
+    namespace MyCompany\Entity;
+
+    use MyCompany\Annotations\Foo;
+    use MyCompany\Annotations\Bar;
+    use MyCompany\Entity\SomeClass;
+
+    /**
+    * @Foo(PHP_EOL)
+    * @Bar(Bar::FOO)
+    * @Foo({SomeClass::FOO, SomeClass::BAR})
+    * @Bar({SomeClass::FOO_KEY = SomeClass::BAR_VALUE})
+    */
+    class User
+    {
+    }
+
+
+Be careful with constants and the cache !
+
+.. note::
+
+    The cached reader will not re-evaluate each time an annotation is loaded from cache.
+    When a constant is changed the cache must be cleaned.
+
 
 Usage
 -----
@@ -356,5 +524,3 @@ IDE Support
 Some IDEs already provide support for annotations:
 
 - Eclipse via the `Symfony2 Plugin <http://symfony.dubture.com/>`_
-
-
