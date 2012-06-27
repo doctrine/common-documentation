@@ -73,15 +73,15 @@ To anticipate the configuration section, making the above PHP class work with Do
     use Doctrine\Common\Annotations\AnnotationRegistry;
 
     AnnotationRegistry::registerFile("/path/to/doctrine/lib/Doctrine/ORM/Mapping/Driver/DoctrineAnnotations.php");
-    AnnotationRegistry::registerAnnotationNamespace("Symfony\Component\Validator\Constraint", "/path/to/symfony/src");
-    AnnotationRegistry::registerAnnotationNamespace("MyProject\Annotations", "/path/to/myproject/src");
+    AnnotationRegistry::registerAutoloadNamespace("Symfony\Component\Validator\Constraint", "/path/to/symfony/src");
+    AnnotationRegistry::registerAutoloadNamespace("MyProject\Annotations", "/path/to/myproject/src");
 
     $reader = new AnnotationReader();
     AnnotationReader::addGlobalIgnoredName('dummy');
 
 The second block with the annotation registry calls registers all the three different annotation namespaces that are used.
 Doctrine saves all its annotations in a single file, that is why ``AnnotationRegistry#registerFile`` is used in contrast to
-``AnnotationRegistry#registerAnnotationNamespace`` which creates a PSR-0 compatible loading mechanism for class to file names.
+``AnnotationRegistry#registerAutoloadNamespace`` which creates a PSR-0 compatible loading mechanism for class to file names.
 
 In the third block, we create the actual AnnotationReader instance. Note that we also add "dummy" to the global list of annotations
 for which we do not throw exceptions. Setting this is necessary in our example case, otherwise @dummy would trigger an exception to
