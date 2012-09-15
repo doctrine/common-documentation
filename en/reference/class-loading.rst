@@ -211,7 +211,7 @@ loaders and asks each of them via ``canLoadClass``, returning early
 ``canLoadClass``. If this sounds like it can potentially be rather
 costly then because that is true but it is exactly the same thing
 that class\_exists(..., true) does under the hood, it triggers a
-complete interation of all class/auto loaders. Checking for class
+complete interaction of all class/auto loaders. Checking for class
 existence via invoking autoloading was never a cheap thing to do
 but now it is more obvious and more importantly, this check is no
 longer interleaved with regular class loading, which avoids having
