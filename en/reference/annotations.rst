@@ -56,7 +56,7 @@ In this snippet you can see a variety of different docblock annotations:
 - The fully qualified annotation @MyProject\Annotations\Foobarable. This is transformed directly into the given class name.
 
 How are these annotations loaded? From looking at the code you could guess that the ORM Mapping, Assert Validation and the fully qualified annotation can just be loaded using
-the defined PHP autoloaders. This is not the case however: For error handling reasons every check for class existance inside the AnnotationReader sets the second parameter $autoload
+the defined PHP autoloaders. This is not the case however: For error handling reasons every check for class existence inside the AnnotationReader sets the second parameter $autoload
 of ``class_exists($name, $autoload)`` to false. To work flawlessly the AnnotationReader requires silent autoloaders which many autoloaders are not. Silent autoloading is NOT
 part of the `PSR-0 specification <http://groups.google.com/group/php-standards/web/psr-0-final-proposal>`_ for autoloading.
 
@@ -177,8 +177,8 @@ to configure annotation autoloading:
 -   Calling ``AnnotationRegistry#registerNamespace($namespace, $dirs = null)`` to register that the given namespace
     contains annotations and that their base directory is located at the given $dirs or in the include path if NULL is passed.
     The given directories should *NOT* be the directory where classes of the namespace are in, but the base directory
-    of the root namespace. The AnnotationRegistry uses a namespace to directory seperator approach to resolve the correct path.
--   Calling ``AnnotationRegistry#registerLoader($callabale)`` to register an autoloader callback. The callback accepts the
+    of the root namespace. The AnnotationRegistry uses a namespace to directory separator approach to resolve the correct path.
+-   Calling ``AnnotationRegistry#registerLoader($callable)`` to register an autoloader callback. The callback accepts the
     class as first and only parameter and has to return true if the corresponding file was found and included.
 
 .. note:: 
