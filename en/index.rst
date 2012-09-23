@@ -14,6 +14,7 @@ Contents:
 
    reference/class-loading
    reference/annotations
+   reference/caching
 
 Indices and tables
 ==================
