@@ -4,7 +4,7 @@ Doctrine  Caching
 The Doctrine Common caching library was born from a need in the
 `Doctrine2 ORM <http://www.doctrine-project.org/projects/orm>`_ to
 allow caching of result sets. The library is independent and can be
-used in your own libraries to caching.
+used in your own libraries and applications to implement caching.
 
 Introduction
 ------------
