@@ -9,8 +9,8 @@ used in your own libraries to caching.
 Introduction
 ------------
 
-Doctrine caching provides a very simple interface on top of which
-several out of the box implementations are provided:
+Doctrine Cache provides a very simple interface for which several out
+of the box implementations are provided:
 
 - ApcCache (requires ext/apc)
 - ArrayCache (in memory, lifetime of the request)
@@ -23,6 +23,9 @@ several out of the box implementations are provided:
 - XcacheCache.php (requires ext/xcache)
 - ZendDataCache.php  (requires Zend Server Platform)
 
+A simple code example using ``ArrayCache`` to cache data in memory for the lifetime
+of the request can be found below.
+
 .. code-block :: php
 
     <?php
@@ -32,4 +35,14 @@ several out of the box implementations are provided:
     if (!$id) {
         $id = do_something();
         $cache->save("some key", $id);
+    }
+
+    ..
+
+    $cache->contains("some key");
+    $cache->delete("some key");
+
+    // note all cache backends provide stats
+    foreach ($cache->getStats() as $key => $value) {
+        echo "$key: $value";
     }
