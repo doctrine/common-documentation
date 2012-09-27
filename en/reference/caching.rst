@@ -42,7 +42,10 @@ of the request can be found below.
     $cache->contains("some key");
     $cache->delete("some key");
 
-    // note all cache backends provide stats
-    foreach ($cache->getStats() as $key => $value) {
-        echo "$key: $value";
+    // not all cache backends provide stats, f.e. ArrayCache does not
+    $stats = $cache->getStats();
+    if (!empty($stats)) {
+        foreach ($stats as $key => $value) {
+            echo "$key: $value";
+        }
     }
