@@ -346,6 +346,7 @@ Then you could define one or more targets :
 -  ``PROPERTY`` Allowed in the property docblock
 -  ``METHOD`` Allowed in the method docblock
 -  ``ALL`` Allowed in the class, property and method docblock
+-  ``ANNOTATION`` Allowed inside other annotations
 
 If the annotations is not allowed in the current context you got an ``AnnotationException``
 
