@@ -17,7 +17,7 @@ for metadata purposes a filter is applied to ignore or skip classes that are not
 
 Take a look at the following code snippet:
 
-.. code-block:: php
+.. code-block :: php
 
     <?php
     namespace MyProject\Entities;
@@ -32,8 +32,8 @@ Take a look at the following code snippet:
      */
     class User
     {
-        /**
-         * @ORM\Id @ORM\Column @ORM\GeneratedValue
+        /** 
+         * @ORM\Id @ORM\Column @ORM\GeneratedValue 
          * @dummy
          * @var int
          */
@@ -66,7 +66,7 @@ autoloading then you recognize it is a global as well.
 
 To anticipate the configuration section, making the above PHP class work with Doctrine Annotations requires this setup:
 
-.. code-block:: php
+.. code-block :: php
 
     <?php
     use Doctrine\Common\Annotations\AnnotationReader;
@@ -92,7 +92,7 @@ Setup and Configuration
 
 To use the annotations library is simple, you just need to create a new ``AnnotationReader`` instance:
 
-.. code-block:: php
+.. code-block :: php
 
     <?php
     $reader = new \Doctrine\Common\Annotations\AnnotationReader();
@@ -103,7 +103,7 @@ a caching reader.
 
 You can use a file caching reader:
 
-.. code-block:: php
+.. code-block :: php
 
     <?php
     use Doctrine\Common\Annotations\FileCacheReader;
@@ -122,7 +122,7 @@ during development.
 
 You can also use one of the ``Doctrine\Common\Cache\Cache`` cache implementations to cache the annotations:
 
-.. code-block:: php
+.. code-block :: php
 
     <?php
     use Doctrine\Common\Annotations\AnnotationReader;
@@ -151,7 +151,7 @@ and should be used during development.
 By default the annotation reader returns a list of annotations with numeric indexes. If you want your annotations
 to be indexed by their class name you can wrap the reader in an IndexedReader:
 
-.. code-block:: php
+.. code-block :: php
 
     <?php
     use Doctrine\Common\Annotations\AnnotationReader;
@@ -181,7 +181,7 @@ to configure annotation autoloading:
 -   Calling ``AnnotationRegistry#registerLoader($callable)`` to register an autoloader callback. The callback accepts the
     class as first and only parameter and has to return true if the corresponding file was found and included.
 
-.. note::
+.. note:: 
 
     Loaders have to fail silently, if a class is not found even if it matches for example the namespace prefix of that loader.
     Never is a loader to throw a warning or exception if the loading failed otherwise parsing doc block annotations will become
@@ -207,47 +207,7 @@ A sample loader callback could look like:
     $loader = new UniversalClassLoader();
     AnnotationRegistry::registerLoader(array($loader, "loadClass"));
 
-Default Namespace
-~~~~~~~~~~~~~~~~~
-
-If you don't want to specify the fully qualified class name or import
-classes with the use statement you can set the default annotation namespace using the
-``setDefaultAnnotationNamespace()`` method. The following is an example where we
-specify the fully qualified class name for the annotation:
-
-.. code-block:: php
-
-    <?php
-    /** @MyCompany\Annotations\Foo */
-    class Test
-    {
-    }
-
-To shorten the above code you can configure the default namespace
-to be ``MyCompany\Annotations``:
-
-.. code-block:: php
-
-    <?php
-    $reader->setDefaultAnnotationNamespace('MyCompany\Annotations\\');
-
-Now it can look something like:
-
-.. code-block:: php
-
-    <?php
-    /** @Foo */
-    class Test
-    {
-    }
-
-A little nicer looking!
-
-.. note::
-
-    You should only use this feature if you work in an isolated context
-    where you have full control over all available annotations.
-
+    
 
 Ignoring missing exceptions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -271,7 +231,7 @@ PHP Imports
 
 By default the annotation reader parses the use-statement of a php file to gain access to the import rules
 and register them for the annotation processing. Only if you are using PHP Imports you can validate the correct
-usage of annotations and throw exceptions if you misspelled an annotation. This mechanism is enabled by default.
+usage of annotations and throw exceptions if you misspelled an annotation. This mechanism is enabled by default. 
 
 To ease the upgrade path, we still allow you to disable this mechanism. Note however that we will remove this
 in future versions:
@@ -289,11 +249,11 @@ Annotation Classes
 If you want to define your own annotations you just have to group them in a namespace and register this namespace
 in the AnnotationRegistry. Annotation classes have to contain a class-level docblock with the text ``@Annotation``:
 
-.. code-block:: php
+.. code-block :: php
 
     <?php
     namespace MyCompany\Annotations;
-
+    
     /** @Annotation */
     class Bar
     {
@@ -307,7 +267,7 @@ The annotation parser check if the annotation constructor has arguments,
 if so then we will pass the value array, otherwise will try to inject values into public properties directly:
 
 
-.. code-block:: php
+.. code-block :: php
 
     <?php
     namespace MyCompany\Annotations;
@@ -326,7 +286,7 @@ if so then we will pass the value array, otherwise will try to inject values int
         }
     }
 
-    /**
+    /** 
     * @Annotation
     *
     * Some Annotation without a constructor
@@ -350,7 +310,7 @@ Then you could define one or more targets :
 
 If the annotations is not allowed in the current context you got an ``AnnotationException``
 
-.. code-block:: php
+.. code-block :: php
 
     <?php
     namespace MyCompany\Annotations;
@@ -382,7 +342,7 @@ or using the annotations ``@Attributes`` and ``@Attribute``.
 
 If the data type not match you got an ``AnnotationException``
 
-.. code-block:: php
+.. code-block :: php
 
     <?php
     namespace MyCompany\Annotations;
@@ -433,74 +393,6 @@ If the data type not match you got an ``AnnotationException``
        // some code
     }
 
-Annotation Required
--------------------
-
-``@Required`` indicates that the field must be specified when the annotation is used.
-If it is not used you get an ``AnnotationException`` stating that this value can not be null.
-
-Declaring a required field:
-
-.. code-block:: php
-
-    <?php
-    /**
-     * @Annotation
-     * @Target("ALL")
-     */
-    class Foo
-    {
-        /** @Required */
-        public $requiredField;
-    }
-
-Usage:
-
-.. code-block:: php
-
-    <?php
-    /** @Foo(requiredField="value") */
-    public $direction;                  // Valid
-
-     /** @Foo */
-    public $direction;                  // Required field missing, throws an AnnotationException
-
-Enumerated values
--------------------
-
-- An annotation property marked with ``@Enum`` is a field that accept a fixed set of scalar values.
-- You should use ``@Enum`` fields any time you need to represent fixed values.
-- The annotation parser check the given value and throws an ``AnnotationException`` if the value not match.
-
-
-Declaring an enumerated property :
-
-.. code-block:: php
-
-    <?php
-    /**
-     * @Annotation
-     * @Target("ALL")
-     */
-    class Direction
-    {
-        /**
-         * @Enum({"NORTH", "SOUTH", "EAST", "WEST"})
-         */
-        public $value;
-    }
-
-Annotation usage :
-
-.. code-block:: php
-
-    <?php
-    /** @Direction("NORTH") */
-    public $direction;                  // Valid value
-
-     /** @Direction("NORTHEAST") */
-    public $direction;                  // Invalid value, throws an AnnotationException
-
 
 Constants
 -----------
@@ -509,7 +401,7 @@ The use of constants and class constants are available on the annotations parser
 
 The following usage are allowed :
 
-.. code-block:: php
+.. code-block :: php
 
     <?php
     namespace MyCompany\Entity;
@@ -543,7 +435,7 @@ Usage
 Using the library API is simple. Using the annotations described in the previous section
 you can now annotate other classes with your annotations:
 
-.. code-block:: php
+.. code-block :: php
 
     <?php
     namespace MyCompany\Entity;
@@ -561,7 +453,7 @@ you can now annotate other classes with your annotations:
 
 Now we can write a script to get the annotations above:
 
-.. code-block:: php
+.. code-block :: php
 
     <?php
     $reflClass = new ReflectionClass('MyCompany\Entity\User');
@@ -594,4 +486,3 @@ Some IDEs already provide support for annotations:
 
 - Eclipse via the `Symfony2 Plugin <http://symfony.dubture.com/>`_
 - PHPStorm via the `PHP Annotations Plugin <http://plugins.jetbrains.com/plugin/7320>`_ or the `Symfony2 Plugin <http://plugins.jetbrains.com/plugin/7219>`_
-
