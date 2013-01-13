@@ -434,6 +434,43 @@ If the data type not match you got an ``AnnotationException``
     }
 
 
+Enumerated values
+-------------------
+
+- An annotation property marked with ``@Enum`` is a field that accept a fixed set of scalar values.
+- You should use ``@Enum`` fields any time you need to represent fixed values.
+- The annotation parser check the given value and throws an ``AnnotationException`` if the value not match.
+
+
+Declaring an enumerated property :
+
+.. code-block :: php
+
+    <?php
+    /**
+     * @Annotation
+     * @Target("ALL")
+     */
+    class Direction
+    {
+        /**
+         * @Enum({"NORTH", "SOUTH", "EAST", "WEST"})
+         */
+        public $value;
+    }
+
+Annotation usage :
+
+.. code-block :: php
+
+    <?php
+    /** @Direction("NORTH") */
+    public $direction;                  // Valid value
+
+     /** @Direction("NORTHEAST") */
+    public $direction;                  // Invalid value, throws an AnnotationException
+
+
 Constants
 -----------
 
