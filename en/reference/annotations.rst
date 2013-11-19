@@ -51,9 +51,9 @@ Take a look at the following code snippet:
 In this snippet you can see a variety of different docblock annotations:
 
 - Documentation annotations such as @var and @author. These annotations are on a blacklist and never considered for throwing an exception due to wrongly used annotations.
-- Annotations imported through use statements. The statement "use Doctrine\ORM\Mapping AS ORM" makes all classes under that namespace available as @ORM\ClassName. Same goes for the import of "Assert".
+- Annotations imported through use statements. The statement ``use Doctrine\ORM\Mapping AS ORM`` makes all classes under that namespace available as @ORM\\ClassName. Same goes for the import of "Assert".
 - The @dummy annotation. It is not a documentation annotation and not blacklisted. For Doctrine Annotations it is not entirely clear how to handle this annotation. Depending on the configuration an exception (unknown annotation) will be thrown when parsing this annotation.
-- The fully qualified annotation @MyProject\Annotations\Foobarable. This is transformed directly into the given class name.
+- The fully qualified annotation @MyProject\\Annotations\\Foobarable. This is transformed directly into the given class name.
 
 How are these annotations loaded? From looking at the code you could guess that the ORM Mapping, Assert Validation and the fully qualified annotation can just be loaded using
 the defined PHP autoloaders. This is not the case however: For error handling reasons every check for class existence inside the AnnotationReader sets the second parameter $autoload
