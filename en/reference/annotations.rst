@@ -525,3 +525,5 @@ IDE Support
 Some IDEs already provide support for annotations:
 
 - Eclipse via the `Symfony2 Plugin <http://symfony.dubture.com/>`_
+- PHPStorm via the `PHP Annotations Plugin <http://plugins.jetbrains.com/plugin/7320>`_ or the `Symfony2 Plugin <http://plugins.jetbrains.com/plugin/7219>`_
+
