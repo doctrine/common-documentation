@@ -58,7 +58,7 @@ In this snippet you can see a variety of different docblock annotations:
 How are these annotations loaded? From looking at the code you could guess that the ORM Mapping, Assert Validation and the fully qualified annotation can just be loaded using
 the defined PHP autoloaders. This is not the case however: For error handling reasons every check for class existence inside the AnnotationReader sets the second parameter $autoload
 of ``class_exists($name, $autoload)`` to false. To work flawlessly the AnnotationReader requires silent autoloaders which many autoloaders are not. Silent autoloading is NOT
-part of the `PSR-0 specification <http://groups.google.com/group/php-standards/web/psr-0-final-proposal>`_ for autoloading.
+part of the `PSR-0 specification <https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md>`_ for autoloading.
 
 This is why Doctrine Annotations uses its own autoloading mechanism through a global registry. If you are wondering about the annotation registry being global,
 there is no other way to solve the architectural problems of autoloading annotation classes in a straightforward fashion. Additionally if you think about PHP
