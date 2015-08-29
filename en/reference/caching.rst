@@ -31,10 +31,10 @@ of the request can be found below.
     <?php
 
     $cache = new \Doctrine\Common\Cache\ArrayCache();
-    $id = $cache->fetch("some key");
-    if (!$id) {
-        $id = do_something();
-        $cache->save("some key", $id);
+    $data = $cache->fetch("some key");
+    if ($data === false) {
+        $data = do_something();
+        $cache->save("some key", $data);
     }
 
     ..
