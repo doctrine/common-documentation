@@ -433,6 +433,37 @@ If the data type not match you got an ``AnnotationException``
        // some code
     }
 
+Annotation Required
+-------------------
+
+``@Required`` indicates that the field must be specified when the annotation is used.
+If it is not used you get an ``AnnotationException`` stating that this value can not be null.
+
+Declaring a required field:
+
+.. code-block:: php
+
+    <?php
+    /**
+     * @Annotation
+     * @Target("ALL")
+     */
+    class Foo
+    {
+        /** @Required */
+        public $requiredField;
+    }
+
+Usage:
+
+.. code-block:: php
+
+    <?php
+    /** @Foo(requiredField="value") */
+    public $direction;                  // Valid
+
+     /** @Foo */
+    public $direction;                  // Required field missing, throws an AnnotationException
 
 Enumerated values
 -------------------
